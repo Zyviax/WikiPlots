@@ -1,0 +1,1 @@
+py wikiPlots.py D:\COSC490\wiki_extract D:\COSC490\wiki_plots\plots.txt D:\COSC490\wiki_plots\titles.txt

@@ -15,7 +15,7 @@ if len(sys.argv) > 3:
 	outfilename = sys.argv[2]
 	titlefilename = sys.argv[3]
 else:
-	print "usage:", sys.argv[0], "directory plotfile titlefile"
+	print("usage:", sys.argv[0], "directory plotfile titlefile")
 	exit()
 
 files = [] # All the wiki files
@@ -26,16 +26,18 @@ for dirname, dirnames, filenames in os.walk(os.path.join('.', startdir)):
 		if filename[0] != '.':
 			files.append(os.path.join(dirname, filename))
 
-with open(outfilename, "w") as outfile:
+
+with open(outfilename, "w", encoding="utf-8") as outfile:
 	# Opened the output file
-	with open(titlefilename, "w") as titlefile:
+	with open(titlefilename, "w", encoding="utf-8") as titlefile:
 		# Opened the title file
 		# Walk through each file. Each file has a json for each wikipedia article. Look for jsons with "plot" subheaders
+		fileCount = 0
 		for file in files:
 			#print >> outfile, "file:", file #FOR DEBUGGING
 			data = [] # Each element is a json record
 			# Read the file and get all the json records
-			for line in open(file, 'r'):
+			for line in open(file, 'r', encoding="utf-8"):
 				data.append(json.loads(line))
 			# Look for "plot" in a "h2" tag inside the text of the json
 			for j in data:
@@ -76,7 +78,8 @@ with open(outfilename, "w") as outfile:
 				if len(plot) > 0:
 					# ASSERT: I have a plot
 					# Record the name of the article with the plot
-					print >> titlefile, j['title'].encode('utf-8')
+					print(str(j['title']).encode("utf-8").decode("utf-8"), file=titlefile)
+					titlefile.flush()
 					# remove newlines
 					plot = plot.replace('\n', ' ').replace('\r', '').strip()
 					# remove html tags (probably mainly hyperlinks)
@@ -110,5 +113,8 @@ with open(outfilename, "w") as outfile:
 					# Write the sentences to the plot file
 					for s in sentences:
 						if len(s.strip()) > 0:
-							print >> outfile, s.strip().encode('utf-8')+'.'
-					print >> outfile, "<EOS>"
+							print((s.strip().encode('utf-8')+'.'.encode('utf-8')).decode('utf-8'), file=outfile)
+					print("<EOS>", file=outfile)
+			fileCount += 1
+			if (fileCount % 100 == 0):
+				print("Files processed:", fileCount)
